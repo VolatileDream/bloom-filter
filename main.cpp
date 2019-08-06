@@ -13,7 +13,28 @@
 typedef bloom_filter::BloomFilter Bf;
 
 void usage(char arg0[]) {
-  std::cout << "usage: " << arg0 << " -p|--false-pos 0.1 -n|--items 100000 [--save file]" << std::endl;
+  std::cout << "usage: " << arg0 << std::endl
+      << "  --false-positive|-p <0.0> : sets the false positive rate" << std::endl
+      << "  --elements|-n <10> : sets the key insertion estimate" << std::endl
+      << std::endl
+      << std::endl
+      << "  --load|-l <file> : tries to load the specified filter" << std::endl
+      << "                     Can be specified any number of times." << std::endl
+      << "                     Attempting to load incompatible filters" << std::endl
+      << "                     will cause all but the first to be ignored." << std::endl
+      << "  --save|-s <file> : saves the filter upon exiting the program." << std::endl
+      << "                     (assuming no error occured)" << std::endl
+      << "                     Can only be set once." << std::endl
+      << std::endl
+      << std::endl
+      << "Set one of the following to enable stdin -> stdout filtering." << std::endl
+      << "  --remove-duplicates|-r : runs the filter in a mode that removes duplicates." << std::endl
+      << "  --only-duplicates|-d : runs the filter in a mode that keeps only duplicate items." << std::endl
+      << std::endl
+      << "  --no-update-filter|-u : insertions don't update the filter" << std::endl
+      << "                          Most usefully combined with -d to keep only a preset set of keys" << std::endl
+      << std::endl
+      << "  --help|-h|-? : prints this usage message" << std::endl;
 }
 
 // -p|--false-positive d : false positive rate
@@ -146,14 +167,13 @@ void ConsumeArgs(BloomFilterApp *app, int argc, char* argv[]) {
     // Filtering options
     { "remove-duplicates", no_argument, nullptr, 'r' }, // r
     { "only-duplicates", no_argument, nullptr, 'd' }, // d
-    { "update-filter", no_argument, nullptr, 'u' }, // u
+    { "no-update-filter", no_argument, nullptr, 'u' }, // u
 
     // Filter setup options
     { "false-positive", required_argument, 0, 'p' }, // p:
     { "elements", required_argument, 0, 'n' }, // n:
 
     // Funny options
-    { "insert", no_argument, 0, 'i' }, // i
     { "help", no_argument, 0, 'h' }, // h
 
     { nullptr, 0, nullptr, 0 },
@@ -161,10 +181,10 @@ void ConsumeArgs(BloomFilterApp *app, int argc, char* argv[]) {
 
   char* fpRate = nullptr;
   char* elements = nullptr;
-  bool update = false;
+  bool update = true;
 
   while(true) {
-    const int c = getopt_long(argc, argv, "s:l:p:n:irduh", options, nullptr);
+    const int c = getopt_long(argc, argv, "s:l:p:n:rduh", options, nullptr);
     if (c == -1) {
       break;
     }
@@ -204,9 +224,7 @@ void ConsumeArgs(BloomFilterApp *app, int argc, char* argv[]) {
       elements = optarg;
       break;
      case 'u':
-      update = true;
-      break;
-     case 'i':
+      update = !update;
       break;
      case '?':
      case 'h':
