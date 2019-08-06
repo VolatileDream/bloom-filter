@@ -1,0 +1,4 @@
+include_rules
+
+: foreach *.cpp |> g++ $(FLAGS) -c %f -o %o |> %B.o
+: *.o lib/*.o |> g++ %f $(LIBS) -o %o |> bloom-filter

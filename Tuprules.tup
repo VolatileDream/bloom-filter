@@ -1,0 +1,3 @@
+.gitignore
+FLAGS += -std=c++17 -O3 -Werror
+LIBS += -lm
