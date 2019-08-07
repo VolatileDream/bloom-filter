@@ -7,10 +7,6 @@
 #include <limits>
 #include <vector>
 
-// Ask the compiler to generate uint128_t for us.
-// It'll generate all math ops for us, but might not be efficient.
-typedef unsigned int uint128_t __attribute__((mode(TI)));
-
 namespace bloom_filter {
 
 // Forward declare.
@@ -18,7 +14,7 @@ class BloomFilter;
 class BloomFilterSerializer;
 
 // Hash function filter.
-typedef void (*hash_func)(const void * key, int len, uint32_t seed, uint128_t * out);
+typedef void (*hash_func)(const void * key, int len, uint32_t seed, void * out);
 
 // Trivial builder class for BloomFilter.
 // Allocates memory as necessary.

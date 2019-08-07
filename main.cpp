@@ -1,19 +1,22 @@
 #include "BloomFilter.h"
 
+#include <stdio.h>
 #include <getopt.h>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include "./lib/MurmurHash3.h"
+#include "./lib/PMurHash.h"
 
 #define FILTER_MODE_REMOVE_DUP 1
 #define FILTER_MODE_ONLY_DUPS 2
-#define MAX_KEY_SIZE 8192
+#define MAX_KEY_SIZE 4096
 
 typedef bloom_filter::BloomFilter Bf;
 
 void usage(char arg0[]) {
   std::cout << "usage: " << arg0 << std::endl
+      << std::endl
+      << "Create a new filter, not compatible with -l" << std::endl
       << "  --false-positive|-p <0.0> : sets the false positive rate" << std::endl
       << "  --elements|-n <10> : sets the key insertion estimate" << std::endl
       << std::endl
@@ -37,17 +40,8 @@ void usage(char arg0[]) {
       << "  --help|-h|-? : prints this usage message" << std::endl;
 }
 
-// -p|--false-positive d : false positive rate
-// -n|--elements n : item estimate
-//
-// --load f : read from f (multiple times)
-// --save file : output to file
-//
-// --remove-duplicates : allow only new items
-// --only-duplicates : allow only items previously seen
-
-void CoercedHashFn(const void * key, int len, uint32_t seed, uint128_t * out) {
-  MurmurHash3_x64_128(key, len, seed, (void*)out);
+inline void CoercedHashFn(const void * key, int len, uint32_t seed, void * out) {
+  PMurHash32_test(key, len, seed, (void*)out);
 }
 
 class BloomFilterApp {
@@ -121,32 +115,61 @@ class BloomFilterApp {
     return true;
   }
 
-  void Filter(std::istream& i, std::ostream& o, bool update = true) {
+  void Filter(FILE * in, FILE * out, bool update = true) {
     if (!filterMode_) {
       // filtering not set
       return;
     }
-    std::string buffer;
-    while (i.good()) {
-      buffer.clear();
-      std::getline(i, buffer);
 
-      if (buffer.size() == 0) { continue; }
+    // Change buffering for input -> should be faster.
+    char ioBuffer[MAX_KEY_SIZE * 2];
+    setvbuf(in, ioBuffer, _IOFBF, MAX_KEY_SIZE * 2);
+    
 
+    char buffer[MAX_KEY_SIZE + 1];
+    uint32_t key_length;
+
+    while (ReadKey(in, buffer, MAX_KEY_SIZE, &key_length)) {
+      buffer[key_length] = '\n';
       bool in_filter = false;
       if (update) {
-        in_filter = bf_->Add(buffer.c_str(), buffer.size());
+        in_filter = bf_->Add(buffer, key_length);
       } else {
-        in_filter = bf_->Check(buffer.c_str(), buffer.size());
+        in_filter = bf_->Check(buffer, key_length);
       }
-
-      //std::cerr << "(" << buffer << "): " << in_filter << std::endl;
 
       if ((filterMode_ == FILTER_MODE_REMOVE_DUP && !in_filter)
           || (filterMode_ == FILTER_MODE_ONLY_DUPS && in_filter)) {
-        o << buffer << std::endl;
+        int _rc = fwrite(buffer, sizeof(char), key_length + 1, out);
       }
     }
+  }
+
+  bool ReadKey(FILE *in, char *buf, uint32_t length, uint32_t *read) {
+    char *ptr = buf;
+    uint32_t len = 0;
+
+    while (len < length) {
+      char c = fgetc(in);
+      if (c == EOF) {
+        return false;
+      } else if (c == '\n') {
+        break;
+      }
+      buf[len] = c;
+      len++;
+    }
+
+    *read = len;
+    if (len >= length) {
+      // consume the rest of the buffer until newline
+      char c = 0;
+      while (c != '\n' && c != EOF) {
+        c = fgetc(in);
+      }
+    }
+
+    return true;
   }
 
  protected:
@@ -244,7 +267,7 @@ void ConsumeArgs(BloomFilterApp *app, int argc, char* argv[]) {
     }
   }
 
-  app->Filter(std::cin, std::cout, update);
+  app->Filter(stdin, stdout, update);
 
   if(!app->MaybeSaveOnExit()) {
     std::cerr << "error saving filter" << std::endl;

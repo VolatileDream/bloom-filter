@@ -65,7 +65,7 @@ bool BloomFilter::Set(size_t index, bool val) {
 bool BloomFilter::Add(const void * key, int len) {
   bool changed = false;
   for (uint32_t idx = 0; idx < hashCount_; idx++) {
-    uint128_t hash;
+    uint32_t hash;
     (*func_)(key, len, idx, &hash);
     size_t index = hash % size_;
     changed |= Set(index, true);
@@ -75,7 +75,7 @@ bool BloomFilter::Add(const void * key, int len) {
 bool BloomFilter::Check(const void * key, int len) const {
   bool present = true;
   for (uint32_t idx = 0; idx < hashCount_; idx++) {
-    uint128_t hash;
+    uint32_t hash;
     (*func_)(key, len, idx, &hash);
     size_t index = hash % size_;
     present &= IsSet(index);

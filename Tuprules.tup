@@ -1,3 +1,3 @@
 .gitignore
-FLAGS += -std=c++17 -O3 -Werror
+FLAGS += -std=c++11 -g -O3 -Werror
 LIBS += -lm
