@@ -3,6 +3,7 @@
 ##### Do not edit.
 .tup
 /.gitignore
-/BloomFilter.o
+/app.o
 /bloom-filter
+/libbloom.o
 /main.o

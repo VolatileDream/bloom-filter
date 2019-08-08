@@ -1,3 +1,4 @@
 .gitignore
-FLAGS += -std=c++11 -g -O3 -Werror
+FLAGS += -std=c99 -Werror -Wall -Wextra -O3
 LIBS += -lm
+CC = musl-gcc
