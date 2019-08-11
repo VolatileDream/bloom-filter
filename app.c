@@ -141,7 +141,7 @@ void app_filter(app_t *a, FILE *in, FILE *out, bool update) {
     } else {
       exists = bf_has(a->filter, buffer, length);
     }
-    if ((a->mode == RemoveDuplicates && exists)
+    if ((a->mode == RemoveDuplicates && !exists)
         || (a->mode == OnlyDuplicates && exists)) {
       fwrite(buffer, sizeof(char), length + 1, out);
     }
