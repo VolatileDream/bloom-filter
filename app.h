@@ -8,7 +8,7 @@
 typedef struct bloom_app app_t;
 struct bloom_app;
 
-app_t* app_init();
+app_t* app_init(hash_func func);
 void app_del(app_t* a);
 
 bool app_create_filter(app_t *a, char *fp, char *elements);

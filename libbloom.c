@@ -41,7 +41,8 @@ uint64_t word_length(uint64_t bits) {
 }
 
 filter_t* bf_mk(hash_func hf, uint32_t hashes, uint64_t number_of_bits) {
-  filter_t *f = malloc(sizeof(filter_t) + word_length(number_of_bits)*sizeof(uint64_t));
+  filter_t *f = (filter_t*)
+      malloc(sizeof(filter_t) + word_length(number_of_bits)*sizeof(uint64_t));
   f->func = hf;
   f->hashes = hashes;
   f->size = number_of_bits;

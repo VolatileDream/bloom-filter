@@ -30,7 +30,7 @@ FILE* req_open(char *file, char *mode) {
 }
 
 app_t* app_init(hash_func func) {
-  app_t *res = malloc(sizeof(app_t));
+  app_t *res = (app_t*) malloc(sizeof(app_t));
   res->filter = 0;
   res->save = 0;
   res->mode = Unset;
