@@ -46,7 +46,7 @@ filter_t* bf_mk(hash_func hf, uint32_t hashes, uint64_t number_of_bits) {
   f->func = hf;
   f->hashes = hashes;
   f->size = number_of_bits;
-  f->content = ((uint64_t*)f) + sizeof(filter_t);
+  f->content = (uint64_t*)(f + 1);
   memset(f->content, 0, word_length(f->size)*sizeof(uint64_t));
   return f;
 }
