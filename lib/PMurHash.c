@@ -180,7 +180,7 @@ void PMurHash32_Process(uint32_t *ph1, uint32_t *pcarry, const void *key, int le
   uint32_t h1 = *ph1;
   uint32_t c = *pcarry;
 
-  const uint8_t *ptr = (uint8_t*)key;
+  const uint8_t *ptr = (const uint8_t*)key;
   const uint8_t *end;
 
   /* Extract carry count from low 2 bits of c value */
@@ -296,7 +296,7 @@ uint32_t PMurHash32(uint32_t seed, const void *key, int len)
 void PMurHash32_test(const void *key, int len, uint32_t seed, void *out)
 {
   uint32_t h1=seed, carry=0;
-  const uint8_t *ptr = (uint8_t*)key;
+  const uint8_t *ptr = (const uint8_t*)key;
   const uint8_t *end = ptr + len;
 
 #if 0 /* Exercise the progressive processing */
