@@ -66,7 +66,7 @@ int run(app_t *app, int argc, char* argv[]) {
       }
       break;
      case 'l':
-      if (!app_load(app, optarg)) {
+      if (app_load(app, optarg) != 0) {
         fprintf(stderr, "unable to load file: %s\n", optarg);
         return 3;
       }
@@ -106,7 +106,7 @@ int run(app_t *app, int argc, char* argv[]) {
   if (fpRate || elements) {
     if (fpRate && elements) {
       if(!app_create_filter(app, fpRate, elements)) {
-        fprintf(stderr, "error creating filter: conflict with loaded filters?\n");
+        fprintf(stderr, "error creating filter: was a filter already loaded?\n");
       }
     } else {
       fprintf(stderr,
