@@ -18,7 +18,7 @@ struct bloom_app {
 };
 
 // Require opening a file.
-FILE* req_open(char *file, char *mode) {
+FILE* req_open(const char *file, const char *mode) {
   FILE *f = fopen(file, mode);
   if (!f) {
     char buffer[1024] = {0};
@@ -38,6 +38,9 @@ app_t* app_init(hash_func func) {
   return res;
 }
 void app_del(app_t* a) {
+  if (a->filter) {
+    bf_del(a->filter);
+  }
   free(a);
 }
 
@@ -110,7 +113,7 @@ bool read_key(FILE *in, char *buf, uint32_t length, uint32_t *read) {
     } else if (c == '\n') {
       break;
     }
-    buf[len] = c;
+    buf[len] = (char)c;
     len++;
   }
 
