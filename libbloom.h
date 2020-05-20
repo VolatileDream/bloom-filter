@@ -22,6 +22,7 @@ bool bf_has(filter_t *f, const void *key, int len);
 // Does not free the existing filters.
 filter_t* bf_merge(filter_t *f1, filter_t *f2);
 
+// Returns true on success.
 bool bf_write_to_file(filter_t *f, FILE *file);
 filter_t* bf_read_from_file(FILE *file, hash_func hf);
 

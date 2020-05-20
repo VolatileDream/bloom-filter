@@ -111,54 +111,54 @@ filter_t* bf_merge(filter_t *f1, filter_t *f2) {
 
 bool out32(FILE *f, uint32_t i) {
   i = htobe32(i);
-  return fwrite(&i, sizeof(uint32_t), 1, f) == 1;
+  return fwrite(&i, sizeof(uint32_t), 1, f) != 1;
 }
 bool out64(FILE *f, uint64_t i) {
   i = htobe64(i);
-  return fwrite(&i, sizeof(uint64_t), 1, f) == 1;
+  return fwrite(&i, sizeof(uint64_t), 1, f) != 1;
 }
 bool bf_write_to_file(filter_t *f, FILE *file) {
-  bool success = true;
-  success |= out32(file, MAGIC_HEADER);
-  success |= out32(file, f->hashes);
-  success |= out64(file, f->size);
-  for (uint64_t i=0; i < word_length(f->size); i++) {
-    success |= out64(file, f->content[i]);
+  bool failure = false;
+  failure = failure || out32(file, MAGIC_HEADER);
+  failure = failure || out32(file, f->hashes);
+  failure = failure || out64(file, f->size);
+  for (uint64_t i=0; i < word_length(f->size) && !failure; i++) {
+    failure = failure || out64(file, f->content[i]);
   }
-  return false;
+  return !failure;
 }
 
 
 bool read32(FILE *f, uint32_t *i) {
   size_t s = fread(i, sizeof(uint32_t), 1, f);
   *i = be32toh(*i);
-  return s == 1;
+  return s != 1;
 }
 bool read64(FILE *f, uint64_t *i) {
   size_t s = fread(i, sizeof(uint64_t), 1, f);
   *i = be64toh(*i);
-  return s == 1;
+  return s != 1;
 }
 
 filter_t* bf_read_from_file(FILE *file, hash_func hf) {
   uint32_t header = 0;
   uint32_t hashes = 0;
   uint64_t size = 0;
-  bool success = true;
-  success |= read32(file, &header);
-  success |= read32(file, &hashes);
-  success |= read64(file, &size);
+  bool failure = false;
+  failure = failure || read32(file, &header);
+  failure = failure || read32(file, &hashes);
+  failure = failure || read64(file, &size);
 
-  if (!success || header != MAGIC_HEADER) {
+  if (failure || header != MAGIC_HEADER) {
     return 0;
   }
 
   filter_t *f = bf_mk(hf, hashes, size);
-  for (uint64_t i=0; i < word_length(size) && success; i++) {
-    success |= read64(file, &f->content[i]);
+  for (uint64_t i=0; i < word_length(size) && !failure; i++) {
+    failure = failure || read64(file, &f->content[i]);
   }
 
-  if (!success) {
+  if (failure) {
     bf_del(f);
     return 0;
   }
