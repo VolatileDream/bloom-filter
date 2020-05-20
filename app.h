@@ -13,6 +13,7 @@ void app_del(app_t* a);
 
 bool app_create_filter(app_t *a, char *fp, char *elements);
 
+// Returns error code on failure, zero on success.
 int app_load(app_t *a, char *file);
 bool app_queue_save(app_t *a, char *file);
 bool app_maybe_save_on_exit(app_t *a);

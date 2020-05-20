@@ -57,7 +57,7 @@ bool app_create_filter(app_t *a, char *fpRate, char *elements) {
 }
 
 int app_load(app_t *a, char *file) {
-  FILE *input = req_open(file, "rb");
+  FILE *input = req_open(file, "r");
   filter_t *fl = bf_read_from_file(input, a->func);
   fclose(input);
   if (!fl) {
@@ -90,7 +90,7 @@ bool app_maybe_save_on_exit(app_t *a) {
   if (!a->save) {
     return true;
   }
-  FILE *output = req_open(a->save, "wb");
+  FILE *output = req_open(a->save, "w");
   bool res = bf_write_to_file(a->filter, output);
   fclose(output);
   return res;
