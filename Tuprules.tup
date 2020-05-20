@@ -1,4 +1,4 @@
 .gitignore
-FLAGS += -std=c99 -Werror -Wall -Wextra -O3
+FLAGS += -std=c99 -Werror -Wall -Wextra -O3 -Wpedantic -Wshadow -Wcast-qual -Wcast-align=strict -Wwrite-strings -Wdate-time -Wunused
 LIBS += -lm
 CC = musl-gcc
