@@ -1,7 +1,7 @@
 bloom
 =====
 
-Bloom filter implementation in simple C++:
+Bloom filter implementation in simple C:
 http://en.wikipedia.org/wiki/Bloom_filter
 
 Murmur Hash 3 used in current implementation:  
