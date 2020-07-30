@@ -126,6 +126,7 @@ int run(app_t *app, int argc, char* argv[]) {
 
   return 0;
 }
+
 int main(int argc, char **argv) {
   app_t *app = app_init(PMurHash32);
   int rc = run(app, argc, argv);

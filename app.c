@@ -138,14 +138,14 @@ void app_filter(app_t *a, FILE *in, FILE *out, bool update) {
 
   while (read_key(in, buffer, MAX_KEY_LEN, &length)) {
     buffer[length] = '\n';
-    bool exists = false;
+    bool already_exists = false;
     if (update) {
-      exists = bf_add(a->filter, buffer, length);
+      already_exists = bf_add(a->filter, buffer, length);
     } else {
-      exists = bf_has(a->filter, buffer, length);
+      already_exists = bf_has(a->filter, buffer, length);
     }
-    if ((a->mode == RemoveDuplicates && !exists)
-        || (a->mode == OnlyDuplicates && exists)) {
+    if ((a->mode == RemoveDuplicates && !already_exists)
+        || (a->mode == OnlyDuplicates && already_exists)) {
       fwrite(buffer, sizeof(char), length + 1, out);
     }
   }
