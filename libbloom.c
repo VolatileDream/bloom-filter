@@ -73,13 +73,13 @@ bool bf_bit_is_set(filter_t *f, uint64_t bit) {
   return (f->content[word] >> bit) & 0x1LL;
 }
 
-// Sets the bit, returns true if the bit was already set.
+// Sets the bit, returns true if the bit was modified.
 bool bf_bit_set(filter_t *f, uint64_t bit) {
   uint64_t word = bit / WORD_BIT_SIZE;
   bit = bit % WORD_BIT_SIZE;
   uint64_t prev = f->content[word];
   f->content[word] = prev | (0x1LL << bit);
-  return prev == f->content[word];
+  return prev != f->content[word];
 }
 
 bool bf_add(filter_t *f, const void *key, int len) {
@@ -88,7 +88,7 @@ bool bf_add(filter_t *f, const void *key, int len) {
     uint32_t hash = f->func(i, key, len) % f->size;
     changed |= bf_bit_set(f, hash);
   }
-  return changed;
+  return !changed;
 }
 
 bool bf_has(filter_t *f, const void *key, int len) {
