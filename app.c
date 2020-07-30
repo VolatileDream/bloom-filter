@@ -129,7 +129,7 @@ bool read_key(FILE *in, char *buf, uint32_t length, uint32_t *read) {
 }
 
 void app_filter(app_t *a, FILE *in, FILE *out, bool update) {
-  if (a->mode == Unset) {
+  if (a->mode == Unset || !a->filter) {
     return;
   }
 
