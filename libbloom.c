@@ -34,7 +34,8 @@ struct bloom_filter {
   uint64_t *content; // pointer to memory 
 };
 
-
+// Returns the number of words (assumed to be int64_t) required to hold
+// `bits` number of bits.
 uint64_t word_length(uint64_t bits) {
   uint64_t l = bits / WORD_BIT_SIZE;
   return l + (bits % WORD_BIT_SIZE > 0);
@@ -65,16 +66,19 @@ void bf_del(filter_t *f) {
   free(f);
 }
 
+// Checks if a bit is set.
 bool bf_bit_is_set(filter_t *f, uint64_t bit) {
   uint64_t word = bit / WORD_BIT_SIZE;
   bit = bit % WORD_BIT_SIZE;
-  return (f->content[word] >> bit) & 0x1;
+  return (f->content[word] >> bit) & 0x1LL;
 }
+
+// Sets the bit, returns true if the bit was already set.
 bool bf_bit_set(filter_t *f, uint64_t bit) {
   uint64_t word = bit / WORD_BIT_SIZE;
   bit = bit % WORD_BIT_SIZE;
   uint64_t prev = f->content[word];
-  f->content[word] |= 0x1 << bit;
+  f->content[word] = prev | (0x1LL << bit);
   return prev == f->content[word];
 }
 
@@ -86,6 +90,7 @@ bool bf_add(filter_t *f, const void *key, int len) {
   }
   return changed;
 }
+
 bool bf_has(filter_t *f, const void *key, int len) {
   bool exists = true;
   for (uint32_t i = 0; i < f->hashes; i++) {
