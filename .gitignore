@@ -6,4 +6,5 @@
 /app.o
 /bloom-filter
 /libbloom.o
+/libserde.o
 /main.o
