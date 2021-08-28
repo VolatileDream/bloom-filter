@@ -1,5 +1,5 @@
 #include "libbloom.h"
-#include "libs/c/serde/libserde.h"
+#include "data/serde/libserde.h"
 
 #include <math.h>
 #include <stdlib.h>
