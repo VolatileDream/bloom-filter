@@ -4,7 +4,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "./lib/PMurHash.h"
+#include "third-party/smhasher/src/PMurHash.h"
 
 void usage(char *arg0) {
   printf("usage: %s\n\n", arg0);

@@ -1,4 +1,4 @@
 include_rules
 
 : foreach *.c |> !cc |>
-: *.o lib/*.o $(TUP_ROOT)/libs/c/serde/libserde.o |> !prog |> bloom-filter
+: *.o $(TUP_ROOT)/libs/c/serde/libserde.o $(TUP_ROOT)/third-party/libmurmurhash3.o |> !prog |> bloom-filter

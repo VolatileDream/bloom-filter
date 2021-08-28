@@ -1,3 +1,0 @@
-include_rules
-
-: foreach *.c |> $(CC) -std=c11 -Werror -Wall -Wextra -O3 -I $(TUP_ROOT) -c %f -o %o |> %B.o
