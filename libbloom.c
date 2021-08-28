@@ -1,5 +1,5 @@
 #include "libbloom.h"
-#include "libserde.h"
+#include "libs/c/serde/libserde.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -97,35 +97,37 @@ filter_t* bf_merge(filter_t *f1, filter_t *f2) {
   return res;
 }
 bool bf_write_to_file(filter_t *f, FILE *file) {
-  bool failure = false;
-  failure = failure || out32(file, MAGIC_HEADER);
-  failure = failure || out32(file, f->hashes);
-  failure = failure || out64(file, f->size);
-  for (uint64_t i=0; i < word_length(f->size) && !failure; i++) {
-    failure = failure || out64(file, f->content[i]);
+  bool ok = true;
+  ok = ok && serde_write_u32(file, MAGIC_HEADER);
+  ok = ok && serde_write_u32(file, f->hashes);
+  ok = ok && serde_write_u64(file, f->size);
+
+  for (uint64_t i=0; i < word_length(f->size) && ok; i++) {
+    ok = ok && serde_write_u64(file, f->content[i]);
   }
-  return !failure;
+  return ok;
 }
 
 filter_t* bf_read_from_file(FILE *file, hash_func hf) {
   uint32_t header = 0;
   uint32_t hashes = 0;
   uint64_t size = 0;
-  bool failure = false;
-  failure = failure || read32(file, &header);
-  failure = failure || read32(file, &hashes);
-  failure = failure || read64(file, &size);
 
-  if (failure || header != MAGIC_HEADER) {
+  bool ok = true;
+  ok = ok && serde_read_u32(file, &header);
+  ok = ok && serde_read_u32(file, &hashes);
+  ok = ok && serde_read_u64(file, &size);
+
+  if (!ok || header != MAGIC_HEADER) {
     return 0;
   }
 
   filter_t *f = bf_mk(hf, hashes, size);
-  for (uint64_t i=0; i < word_length(size) && !failure; i++) {
-    failure = failure || read64(file, &f->content[i]);
+  for (uint64_t i=0; i < word_length(size) && ok; i++) {
+    ok = ok && serde_read_u64(file, &f->content[i]);
   }
 
-  if (failure) {
+  if (!ok) {
     bf_del(f);
     return 0;
   }

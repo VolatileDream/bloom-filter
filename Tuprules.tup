@@ -1,7 +1,0 @@
-.gitignore
-FLAGS += -std=c11 -Werror -Wall -Wextra -O3 -Wpedantic -Wshadow -Wcast-qual -Wcast-align=strict -Wwrite-strings -Wdate-time -Wunused
-LIBS += -lm
-CC = musl-gcc
-
-!cc = |> $(CC) $(FLAGS) -c %f -o %o |> %B.o
-!prog = |> $(CC) %f $(LIBS) -static -o %o |>
