@@ -97,15 +97,15 @@ filter_t* bf_merge(filter_t *f1, filter_t *f2) {
   return res;
 }
 bool bf_write_to_file(filter_t *f, FILE *file) {
-  bool ok = true;
-  ok = ok && serde_write_u32(file, MAGIC_HEADER);
-  ok = ok && serde_write_u32(file, f->hashes);
-  ok = ok && serde_write_u64(file, f->size);
+  serde_start();
+  serde_do(write, file, MAGIC_HEADER);
+  serde_do(write, file, f->hashes);
+  serde_do(write, file, f->size);
 
-  for (uint64_t i=0; i < word_length(f->size) && ok; i++) {
-    ok = ok && serde_write_u64(file, f->content[i]);
+  for (uint64_t i=0; i < word_length(f->size) && !serde_error(); i++) {
+    serde_do(write, file, f->content[i]);
   }
-  return ok;
+  serde_return();
 }
 
 filter_t* bf_read_from_file(FILE *file, hash_func hf) {
@@ -113,21 +113,21 @@ filter_t* bf_read_from_file(FILE *file, hash_func hf) {
   uint32_t hashes = 0;
   uint64_t size = 0;
 
-  bool ok = true;
-  ok = ok && serde_read_u32(file, &header);
-  ok = ok && serde_read_u32(file, &hashes);
-  ok = ok && serde_read_u64(file, &size);
+  serde_start();
+  serde_do(read, file, &header);
+  serde_do(read, file, &hashes);
+  serde_do(read, file, &size);
 
-  if (!ok || header != MAGIC_HEADER) {
+  if (serde_error() || header != MAGIC_HEADER) {
     return 0;
   }
 
   filter_t *f = bf_mk(hf, hashes, size);
-  for (uint64_t i=0; i < word_length(size) && ok; i++) {
-    ok = ok && serde_read_u64(file, &f->content[i]);
+  for (uint64_t i=0; i < word_length(size) && !serde_error(); i++) {
+    serde_do(read, file, &f->content[i]);
   }
 
-  if (!ok) {
+  if (serde_error()) {
     bf_del(f);
     return 0;
   }
