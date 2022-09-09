@@ -1,6 +1,0 @@
-include_rules
-
-: foreach *.c |> !cc |>
-: *.o $(TUP_ROOT)/data/serde/libserde.o $(TUP_ROOT)/third-party/libmurmurhash3.o |> !prog |> bloom-filter
-
-: bloom-filter |> !bin |>
